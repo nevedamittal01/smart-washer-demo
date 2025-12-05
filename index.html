@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Waterless Washer — Demo</title>
+  <style>
+    :root{--bg:#fbf7f2;--card:#ffffff;--accent:#2b8bf5;--muted:#7a6f6a;--glass: rgba(255,255,255,0.6)}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#3b302c;background:linear-gradient(180deg,#fbf7f2 0%, #f1ece6 100%)}
+    .container{max-width:1100px;margin:28px auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h1{font-size:28px;margin:0;color:#2f2b29}
+    p.lead{margin:6px 0 0;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:1fr 420px;gap:24px;margin-top:20px}
+
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(40,36,33,0.06)}
+    .features ul{padding-left:18px;margin:8px 0;color:var(--muted)}
+    .status{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    .panel{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(43,139,245,0.06), rgba(43,139,245,0.02))}
+    .big{font-size:22px;font-weight:600}
+    .small{font-size:13px;color:var(--muted)}
+
+    .controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    button{border:0;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-muted{background:#f1f1f1;color:#333}
+
+    .schedule{display:flex;gap:8px;align-items:center;margin-top:10px}
+    input[type=datetime-local]{padding:8px;border-radius:6px;border:1px solid #e4e4e4}
+
+    .log{height:200px;overflow:auto;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;font-family:monospace;font-size:13px}
+
+    .footer-note{margin-top:12px;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media (max-width:980px){.layout{grid-template-columns:1fr;}.container{padding:16px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Smart Waterless Washer — Demo Control Panel</h1>
+        <p class="lead">Wi‑Fi & Bluetooth connected • UVC sterilization • AI optimization • Mobile & Voice control (demo)</p>
+      </div>
+      <div style="text-align:right;color:var(--muted)">
+        <div id="connStatus">Status: <strong id="connection">Disconnected</strong></div>
+        <div style="font-size:12px;margin-top:6px">Model: <strong>WWS‑AI‑100</strong></div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <main>
+        <div class="card features">
+          <h3 style="margin-top:0">Overview</h3>
+          <p class="small">This web demo simulates a washer with built-in Wi‑Fi and Bluetooth modules. Using the UI you can start, stop, schedule, and monitor a sterilization cycle. The app also demonstrates notifications, predictive alerts and voice-control commands.</p>
+
+          <h4 style="margin-bottom:6px">Key Features</h4>
+          <ul>
+            <li>Start / Stop / Pause cycles remotely</li>
+            <li>Schedule cycles and view upcoming jobs</li>
+            <li>Real-time notifications: cycle status, energy usage, maintenance alerts</li>
+            <li>Voice command demo ("start", "stop", "status") using browser speech API</li>
+            <li>AI simulation: fabric detection and adaptive UVC exposure</li>
+          </ul>
+
+          <div style="margin-top:10px" class="status">
+            <div class="card panel">
+              <div class="big" id="cycleState">Idle</div>
+              <div class="small">Current Cycle Status</div>
+              <div style="margin-top:8px">Progress: <span id="progress">0%</span></div>
+            </div>
+
+            <div class="card panel">
+              <div class="big" id="uvTime">UVC: 0s</div>
+              <div class="small">Planned UVC exposure (AI-adjusted)</div>
+              <div style="margin-top:8px">Energy: <span id="energy">0 Wh</span></div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div class="controls">
+              <button class="btn-primary" id="btnConnect">Connect</button>
+              <button class="btn-primary" id="btnStart">Start</button>
+              <button class="btn-muted" id="btnStop">Stop</button>
+              <button class="btn-muted" id="btnVoice">Voice Command</button>
+            </div>
+
+            <div class="schedule">
+              <label class="small">Schedule:</label>
+              <input id="schedInput" type="datetime-local" />
+              <button class="btn-primary" id="btnSchedule">Set</button>
+            </div>
+
+            <div class="footer-note">Tip: Allow notifications when prompted to receive cycle alerts.</div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <h4 style="margin-top:0">Activity Log</h4>
+          <div id="log" class="log">[System] Ready. Open this page to demo the washer.</div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="card">
+          <h4 style="margin-top:0">Device Details</h4>
+          <p class="small">Connectivity: <strong>Wi‑Fi / Bluetooth</strong></p>
+          <p class="small">Controls: Mobile App, Voice (Google/Alexa integration via cloud), Local buttons</p>
+          <p class="small">AI: Fabric detection • Load estimation • Adaptive UVC timing</p>
+          <p class="small">Maintenance: Filter reminders • UVC lamp health • Door sensor checks</p>
+
+          <hr style="border:none;border-top:1px dashed #eee;margin:12px 0" />
+
+          <div style="margin-top:6px">
+            <strong>Notifications</strong>
+            <div id="notifList" style="margin-top:6px;color:var(--muted);font-size:13px">No notifications yet</div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <h4 style="margin-top:0">Voice Control Demo</h4>
+          <p class="small">Click <strong>Voice Command</strong> then speak: "start", "stop", or ask "status".</p>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+<script>
+  // Simple demo simulation logic
+  const logEl = document.getElementById('log');
+  const notifList = document.getElementById('notifList');
+  const connectionEl = document.getElementById('connection');
+  const progressEl = document.getElementById('progress');
+  const cycleStateEl = document.getElementById('cycleState');
+  const uvTimeEl = document.getElementById('uvTime');
+  const energyEl = document.getElementById('energy');
+
+  let connected = false;
+  let running = false;
+  let progress = 0;
+  let uvSeconds = 0;
+  let energy = 0;
+  let interval = null;
+
+  function writeLog(msg){
+    const time = new Date().toLocaleTimeString();
+    logEl.innerText = `[${time}] ${msg}\n` + logEl.innerText;
+  }
+
+  function pushNotif(txt){
+    notifList.innerText = txt;
+    if(window.Notification && Notification.permission === 'granted'){
+      new Notification('Washer Notification', {body: txt});
+    }
+    writeLog('[NOTIF] ' + txt);
+  }
+
+  document.getElementById('btnConnect').addEventListener('click', ()=>{
+    connected = !connected;
+    connectionEl.innerText = connected ? 'Connected (Wi-Fi)' : 'Disconnected';
+    writeLog(connected ? 'Device connected.' : 'Device disconnected.');
+    if(connected) pushNotif('Device connected to your app.');
+  });
+
+  document.getElementById('btnStart').addEventListener('click', ()=>startCycle());
+  document.getElementById('btnStop').addEventListener('click', ()=>stopCycle());
+
+  document.getElementById('btnSchedule').addEventListener('click', ()=>{
+    const dt = document.getElementById('schedInput').value;
+    if(!dt){ alert('Pick a date/time'); return; }
+    const when = new Date(dt);
+    writeLog('Cycle scheduled at ' + when.toLocaleString());
+    pushNotif('Cycle scheduled for ' + when.toLocaleString());
+    setTimeout(()=>{ startCycle(); }, Math.max(0, when - new Date()));
+  });
+
+  // voice demo using SpeechRecognition (may not work in all browsers)
+  document.getElementById('btnVoice').addEventListener('click', async ()=>{
+    writeLog('Voice demo started. Listening...');
+    if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+      alert('Speech recognition not supported in this browser.');
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = new SpeechRecognition();
+    recog.lang = 'en-US';
+    recog.interimResults = false;
+    recog.maxAlternatives = 1;
+    recog.onresult = (e)=>{
+      const t = e.results[0][0].transcript.toLowerCase();
+      writeLog('Voice heard: ' + t);
+      if(t.includes('start')) startCycle();
+      else if(t.includes('stop')) stopCycle();
+      else if(t.includes('status')) {
+        pushNotif(`Status: ${running? 'Running' : 'Idle'}, Progress ${progress}%`);
+      } else pushNotif('Voice command not recognized. Try start/stop/status.');
+    };
+    recog.start();
+  });
+
+  function startCycle(){
+    if(running) return; running = true; progress = 0; uvSeconds = 0; energy = 0;
+    cycleStateEl.innerText = 'Sterilization Running';
+    pushNotif('Cycle started');
+    writeLog('Sterilization cycle started. AI estimating fabric and adjusting UVC time...');
+
+    // simulate AI: pick uvSeconds based on random "fabric"
+    const fabrics = ['delicate','cotton','synthetic','mixed'];
+    const fabric = fabrics[Math.floor(Math.random()*fabrics.length)];
+    let uvPlan = {delicate:30,cotton:60,synthetic:40,mixed:50}[fabric];
+    uvSeconds = 0;
+    uvTimeEl.innerText = `UVC: 0s (plan ${uvPlan}s)`;
+    pushNotif('AI detected fabric: ' + fabric + '. Planned UVC: ' + uvPlan + 's');
+
+    interval = setInterval(()=>{
+      if(progress >= 100){ stopCycle(); return; }
+      progress += 5;
+      energy += Math.random()*2; // simulate energy consumption
+      progressEl.innerText = progress + '%';
+      energyEl.innerText = Math.round(energy) + ' Wh';
+
+      // increment uv seconds while within plan range
+      if(uvSeconds < uvPlan) uvSeconds += 3;
+      uvTimeEl.innerText = `UVC: ${uvSeconds}s (plan ${uvPlan}s)`;
+
+    }, 1000);
+  }
+
+  function stopCycle(){
+    if(!running) return; running = false;
+    clearInterval(interval); interval = null;
+    cycleStateEl.innerText = 'Idle';
+    progress = Math.min(100, progress);
+    progressEl.innerText = progress + '%';
+    writeLog('Cycle stopped. Final progress: ' + progress + '%');
+    pushNotif('Cycle completed or stopped.');
+  }
+
+  // Request notification permission on load
+  if('Notification' in window){
+    if(Notification.permission === 'default') Notification.requestPermission().then(()=>{});
+  }
+
+  // initial log
+  writeLog('Demo ready. Connect to begin.');
+</script>
+</body>
+</html>
